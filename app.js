@@ -136,8 +136,11 @@ async function readFile(file) {
     if (!/\.xlsx$/i.test(file.name)) throw new Error('엑셀 파일(.xlsx)이 아닙니다.');
     const wb = await loadWorkbook(await file.arrayBuffer());
     wb.eachSheet(ws => {
-      const sheetName = ws.name.trim();
-      if (/예시/.test(sheetName) || ws.state === 'hidden' || ws.state === 'veryHidden') return;
+      if (ws.state === 'hidden' || ws.state === 'veryHidden') return;
+      // 기본 서식의 ‘…예시’ 시트에 그대로 입력해 보내는 경우가 있어 예시 시트도 읽는다.
+      // ‘교육장표창(초)예시’ → ‘교육장표창(초)’ 으로 이름을 맞춰 같은 시트끼리 모은다.
+      const example = /예시/.test(ws.name);
+      const sheetName = ws.name.replace(/예시/g, '').trim() || ws.name.trim();
       const hdr = findHeader(ws);
       if (!hdr) return;
       const titleCell = hdr.headerRow > 1 ? cellText(ws.getRow(1).getCell(1)) : '';
@@ -156,7 +159,7 @@ async function readFile(file) {
         rec.filled = isFilled(row.getCell(hdr.map.date));
         rows.push(rec);
       }
-      entry.sheets.push({ name: sheetName, cat: catOf(sheetName), title: titleCell, rows });
+      entry.sheets.push({ name: sheetName, cat: catOf(sheetName), title: titleCell, rows, example });
     });
     if (!entry.sheets.length) throw new Error('양식 시트를 찾지 못했습니다. (학교명·성명 헤더가 있는 시트가 없음)');
   } catch (e) {
@@ -169,7 +172,6 @@ async function readFile(file) {
 
 function opts() {
   return {
-    skipExample: $('optSkipExample').checked,
     decYellow: $('optDecYellow').checked,
     sort: $('optSort').checked,
     summary: $('optSummary').checked,
@@ -214,12 +216,13 @@ function collect() {
     if (f.error) { notices.push({ level: 'err', where: f.name, msg: f.error }); continue; }
     const schools = {};
     for (const s of f.sheets) {
-      if (!sheets.has(s.name)) sheets.set(s.name, { name: s.name, cat: s.cat, title: s.title, rows: [] });
+      if (!sheets.has(s.name)) sheets.set(s.name, { name: s.name, cat: s.cat, title: s.title, rows: [], example: true });
       const target = sheets.get(s.name);
       if (!target.title && s.title) target.title = s.title;
+      if (!s.example) target.example = false;
       info.counts[s.name] = 0;
       for (const rec of s.rows) {
-        if (o.skipExample && EXAMPLE_SCHOOL.test(rec.school)) { info.excluded++; continue; }
+        if (EXAMPLE_SCHOOL.test(rec.school)) { info.excluded++; continue; }
         const r = { ...rec, birth: normBirth(rec.birth) };
         r.issues = validate(r);
         r.yellow = rec.filled || (o.decYellow && isDecember(rec.date));
@@ -251,7 +254,8 @@ function collect() {
     const i = c ? CAT_ORDER.indexOf(c) : 99;
     return (/교육감/.test(name) ? 0 : /교육장/.test(name) ? 100 : 200) + i;
   };
-  const list = [...sheets.values()].sort((a, b) => order(a.name) - order(b.name) || a.name.localeCompare(b.name, 'ko'));
+  // 예시 시트에서만 나온 시트는 실제 입력이 있을 때만 결과에 넣는다
+  const list = [...sheets.values()].filter(s => !s.example || s.rows.length).sort((a, b) => order(a.name) - order(b.name) || a.name.localeCompare(b.name, 'ko'));
   if (o.sort) for (const s of list) {
     s.rows = s.rows.map((r, i) => [r, i])
       .sort((a, b) => a[0].school.localeCompare(b[0].school, 'ko') || a[1] - b[1])
@@ -504,7 +508,7 @@ $('tabs').addEventListener('click', e => {
 $('clearAll').addEventListener('click', () => {
   if (confirm('업로드한 파일을 모두 지울까요?')) { files.clear(); render(); }
 });
-for (const id of ['optSkipExample', 'optDecYellow', 'optSort']) $(id).addEventListener('change', render);
+for (const id of ['optDecYellow', 'optSort']) $(id).addEventListener('change', render);
 $('download').addEventListener('click', download);
 
 if (typeof ExcelJS === 'undefined' || typeof JSZip === 'undefined') {
