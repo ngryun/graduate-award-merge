@@ -30,6 +30,7 @@ body {
 .top h1 { margin: 0 0 6px; font-size: 24px; }
 .top .sub { margin: 0; opacity: .9; }
 .top .privacy { margin: 10px 0 0; font-size: 13px; opacity: .8; }
+.top .maker { margin: 4px 0 0; font-size: 13px; opacity: .8; }
 
 .card {
   background: var(--card);
@@ -112,3 +113,4 @@ table.grid { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 .empty { color: var(--muted); padding: 24px; text-align: center; }
 
 .foot { color: var(--muted); font-size: 13px; padding-bottom: 32px; }
+.foot-maker { margin: 0 0 6px; font-weight: bold; color: var(--text); }
