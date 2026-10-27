@@ -1,0 +1,9 @@
+# 테스트용 엑셀(개인정보 포함 가능) — 절대 커밋하지 않음
+_test/
+*.xlsx
+*.xls
+~$*
+
+.claude/
+.DS_Store
+Thumbs.db

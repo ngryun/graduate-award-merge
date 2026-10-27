@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>졸업생 표창 명단 취합</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>졸업생 표창 대상자 추천 명단 취합</h1>
+      <p class="sub">학교에서 제출한 추천 명단(서식) 엑셀 파일을 여러 개 올리면, 시트(초·중·고·특)별로 한 파일에 모아 줍니다.</p>
+      <p class="privacy">🔒 파일은 이 브라우저 안에서만 처리되며 어떤 서버로도 전송되지 않습니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <label id="drop" class="drop" for="fileInput">
+        <input id="fileInput" type="file" accept=".xlsx" multiple hidden>
+        <strong>여기에 엑셀 파일(.xlsx)을 끌어다 놓거나 클릭해서 선택하세요</strong>
+        <span>여러 파일을 한 번에 올릴 수 있습니다. 같은 이름의 파일을 다시 올리면 새 파일로 교체됩니다.</span>
+      </label>
+    </section>
+
+    <section class="card" id="filesCard" hidden>
+      <div class="card-head">
+        <h2>업로드한 파일 <span id="fileCount" class="pill"></span></h2>
+        <button id="clearAll" class="btn ghost" type="button">모두 지우기</button>
+      </div>
+      <div class="table-scroll">
+        <table class="grid" id="fileTable"></table>
+      </div>
+    </section>
+
+    <section class="card" id="previewCard" hidden>
+      <div class="card-head">
+        <h2>취합 미리보기</h2>
+        <div id="stats" class="stats"></div>
+      </div>
+      <div id="tabs" class="tabs" role="tablist"></div>
+      <div class="table-scroll tall">
+        <table class="grid preview" id="previewTable"></table>
+      </div>
+    </section>
+
+    <section class="card" id="warnCard" hidden>
+      <div class="card-head">
+        <h2>확인이 필요한 항목 <span id="warnCount" class="pill warn"></span></h2>
+      </div>
+      <ul id="warnList" class="warn-list"></ul>
+    </section>
+
+    <section class="card" id="exportCard" hidden>
+      <h2>내려받기</h2>
+      <div class="options">
+        <label>파일 이름
+          <input id="outName" type="text" value="2026학년도 졸업생 표창 대상자 추천 명단(취합).xlsx">
+        </label>
+        <label class="check"><input id="optSkipExample" type="checkbox" checked> 예시 행(학교명이 OO학교 등) 제외</label>
+        <label class="check"><input id="optDecYellow" type="checkbox" checked> 12월 졸업식은 일시 칸에 노란색 음영 자동 표시</label>
+        <label class="check"><input id="optSort" type="checkbox" checked> 학교명 가나다순 정렬 (해제하면 업로드 순서)</label>
+        <label class="check"><input id="optSummary" type="checkbox" checked> 마지막에 ‘취합현황’ 시트 추가</label>
+      </div>
+      <button id="download" class="btn primary" type="button">취합 엑셀 내려받기</button>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    양식이 바뀌어도 헤더(연번·학교명·성명 등) 이름으로 열을 찾기 때문에 그대로 쓸 수 있습니다. 시트 이름에 ‘예시’가 들어간 시트는 건너뜁니다.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
