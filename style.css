@@ -113,4 +113,3 @@ table.grid { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 .empty { color: var(--muted); padding: 24px; text-align: center; }
 
 .foot { color: var(--muted); font-size: 13px; padding-bottom: 32px; }
-.foot-maker { margin: 0 0 6px; font-weight: bold; color: var(--text); }
